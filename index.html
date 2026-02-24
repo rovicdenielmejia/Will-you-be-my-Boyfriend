@@ -532,11 +532,25 @@
       document.body.addEventListener('click', startMusicOnce, { once: true });
       document.body.addEventListener('touchstart', startMusicOnce, { once: true });
 
-      // ========== No button: starts centered with Yes; on each click shrinks and moves (never over Yes) ==========
+      // ========== No button: stays inside current screen only (never outside viewport), never over Yes ==========
       var NO_BTN_W = 100;
       var NO_BTN_H = 44;
       var YES_PADDING = 32;
       var noScale = 1;
+
+      function getViewportSize() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        if (typeof window.visualViewport !== 'undefined') {
+          w = window.visualViewport.width;
+          h = window.visualViewport.height;
+        }
+        return { w: w, h: h };
+      }
+
+      function getSafeInset() {
+        return Math.max(12, Math.min(24, window.innerWidth * 0.04));
+      }
 
       function getYesRect() {
         var r = btnYes.getBoundingClientRect();
@@ -557,20 +571,25 @@
 
       function moveNoButton() {
         if (!btnNo.classList.contains('floating')) return;
-        var vw = window.innerWidth;
-        var vh = window.innerHeight;
+        var vp = getViewportSize();
+        var vw = vp.w;
+        var vh = vp.h;
         var w = NO_BTN_W * noScale;
         var h = NO_BTN_H * noScale;
-        var margin = 12;
-        var maxLeft = Math.max(margin, vw - w - margin);
-        var maxTop = Math.max(margin, vh - h - margin);
+        var inset = getSafeInset();
+        var minLeft = inset;
+        var maxLeft = Math.max(minLeft, vw - w - inset);
+        var minTop = inset;
+        var maxTop = Math.max(minTop, vh - h - inset);
         var left, top;
         var tries = 0;
         do {
-          left = margin + Math.random() * (maxLeft - margin);
-          top = margin + Math.random() * (maxTop - margin);
+          left = minLeft + Math.random() * (maxLeft - minLeft);
+          top = minTop + Math.random() * (maxTop - minTop);
+          left = Math.max(minLeft, Math.min(maxLeft, left));
+          top = Math.max(minTop, Math.min(maxTop, top));
           tries++;
-        } while (!noOverlapsYes(left, top, w, h) && tries < 40);
+        } while (!noOverlapsYes(left, top, w, h) && tries < 50);
         btnNo.style.left = left + 'px';
         btnNo.style.top = top + 'px';
       }
@@ -605,13 +624,21 @@
       });
 
       window.addEventListener('resize', function () {
-        if (mainPage.classList.contains('hidden') || !btnNo.classList.contains('floating')) return;
-        var left = parseFloat(btnNo.style.left) || 0;
-        var top = parseFloat(btnNo.style.top) || 0;
+        if (!pageContent || pageContent.classList.contains('hidden')) return;
+        if (!btnNo.classList.contains('floating')) return;
+        var vp = getViewportSize();
+        var inset = getSafeInset();
         var w = NO_BTN_W * noScale;
         var h = NO_BTN_H * noScale;
-        if (!noOverlapsYes(left, top, w, h)) moveNoButton();
+        var left = parseFloat(btnNo.style.left) || 0;
+        var top = parseFloat(btnNo.style.top) || 0;
+        var inBounds = left >= inset && top >= inset && left + w <= vp.w - inset && top + h <= vp.h - inset;
+        if (!inBounds || !noOverlapsYes(left, top, w, h)) moveNoButton();
       });
+
+      if (typeof window.visualViewport !== 'undefined') {
+        window.visualViewport.addEventListener('resize', moveNoButton);
+      }
 
       // ========== Confetti burst ==========
       function fireConfetti() {
