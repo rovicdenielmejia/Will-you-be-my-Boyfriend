@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Will you be my boyfriend? 💖</title>
+  <!-- Google Fonts: elegant romantic typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Cormorant:ital,wght@0,300;0,400;0,600&display=swap" rel="stylesheet" />
+  <!-- canvas-confetti for celebration effect -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    /* ========== CSS Variables & Base ========== */
+    :root {
+      --red-dark: #2a0000;
+      --red-mid: #5c0a0a;
+      --red-deep: #8B0000;
+      --red-soft: #a01818;
+      --rose: #c94a4a;
+      --rose-light: #e8a0a0;
+      --gold: #d4af37;
+      --white-soft: #fff9f9;
+      --shadow-soft: rgba(139, 0, 0, 0.2);
+      --font-display: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
+      --font-body: 'Cormorant', Georgia, serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      width: 100%;
+      min-height: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      font-family: var(--font-body);
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    /* ========== Full-screen: whole viewport, no box ========== */
+    /* Single main screen only */
+    .page {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      max-width: 100vw;
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: linear-gradient(160deg, #1a0000 0%, #2d0000 30%, #4a0000 60%, #5c0a0a 100%);
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(0.75rem, 4vw, 2rem) clamp(1rem, 5vw, 3rem);
+      padding-left: max(clamp(1rem, 5vw, 3rem), env(safe-area-inset-left));
+      padding-right: max(clamp(1rem, 5vw, 3rem), env(safe-area-inset-right));
+      padding-top: max(clamp(0.75rem, 4vw, 2rem), env(safe-area-inset-top));
+      padding-bottom: max(clamp(0.75rem, 4vw, 2rem), env(safe-area-inset-bottom));
+      transition: opacity 0.8s ease;
+      overflow: hidden;
+    }
+
+    .page-content {
+      max-width: 32rem;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-content.hidden {
+      display: none;
+    }
+
+    .page-success {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      padding: 1rem;
+    }
+
+    .page-success.visible {
+      display: flex;
+    }
+
+    .question {
+      font-family: var(--font-display);
+      font-weight: 300;
+      font-size: clamp(1.75rem, 5.5vw, 2.75rem);
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+      color: var(--white-soft);
+      margin-bottom: 0.75rem;
+      animation: fadeInUp 1s ease-out 0.15s both;
+    }
+
+    .signature {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(1rem, 2.8vw, 1.25rem);
+      letter-spacing: 0.08em;
+      color: var(--rose-light);
+      opacity: 0.95;
+      margin-bottom: clamp(2rem, 6vw, 3rem);
+      animation: fadeInUp 1s ease-out 0.35s both;
+    }
+
+    /* Elegant divider (twist: minimal ornament) */
+    .divider {
+      width: 4rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+      margin: 0 auto clamp(1.75rem, 5vw, 2.5rem);
+      animation: fadeIn 1s ease-out 0.5s both;
+    }
+
+    /* Sub questions: large and readable */
+    .message {
+      font-family: var(--font-display);
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--white-soft);
+      margin-bottom: 1.5rem;
+      padding: 0.75rem 1rem;
+      min-height: 3rem;
+      animation: fadeIn 0.4s ease-out;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .message:empty { display: none; }
+    .message:not(:empty) { display: block; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Yes + No: both centered at opening; No can become floating and shrink */
+    .cta-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(0.75rem, 3vw, 1.25rem);
+      justify-content: center;
+      align-items: center;
+      animation: fadeInUp 1s ease-out 0.6s both;
+    }
+
+    .btn {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: clamp(0.75rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+      min-height: 2.75rem;
+      min-width: 7rem;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 480px) {
+      .btn {
+        min-height: 2.875rem;
+        min-width: 6.5rem;
+      }
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #8b2a2a, #a01818);
+      color: var(--white-soft);
+      box-shadow: 0 4px 24px var(--shadow-soft);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+    }
+
+    .btn-yes:hover {
+      box-shadow: 0 8px 32px rgba(139, 0, 0, 0.35);
+    }
+
+    .btn-yes.glow {
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 4px 24px var(--shadow-soft); }
+      50% { box-shadow: 0 6px 36px rgba(201, 74, 74, 0.4); }
+    }
+
+    /* No: in flow at start; when .floating, fixed and shrinks each click */
+    .btn-no {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--white-soft);
+      border: 1px solid rgba(232, 160, 160, 0.4);
+      position: relative;
+      z-index: 2;
+      transition: left 0.3s ease-out, top 0.3s ease-out, transform 0.25s ease-out;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-no.floating {
+      position: fixed;
+    }
+
+    .btn-no:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* ========== Floating hearts ========== */
+    .hearts-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .heart-float {
+      position: absolute;
+      font-size: clamp(1.25rem, 3vw, 1.5rem);
+      opacity: 0.35;
+      animation: floatHeart 8s ease-in-out infinite;
+    }
+
+    .heart-float:nth-child(1) { left: 8%; top: 18%; animation-delay: 0s; }
+    .heart-float:nth-child(2) { left: 88%; top: 12%; animation-delay: 1.5s; }
+    .heart-float:nth-child(3) { left: 22%; top: 72%; animation-delay: 3s; }
+    .heart-float:nth-child(4) { left: 72%; top: 62%; animation-delay: 2s; }
+    .heart-float:nth-child(5) { left: 48%; top: 32%; animation-delay: 4s; }
+    .heart-float:nth-child(6) { left: 12%; top: 52%; animation-delay: 1s; }
+    .heart-float:nth-child(7) { left: 82%; top: 38%; animation-delay: 2.5s; }
+    .heart-float:nth-child(8) { left: 38%; top: 82%; animation-delay: 0.5s; }
+    .heart-float:nth-child(9) { left: 92%; top: 78%; animation-delay: 3.5s; }
+
+    @keyframes floatHeart {
+      0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.35; }
+      50% { transform: translateY(-16px) rotate(8deg); opacity: 0.5; }
+    }
+
+    /* Success state on same main screen */
+    .page-success .unlocked {
+      font-family: var(--font-display);
+      font-size: clamp(1.25rem, 4.5vw, 1.85rem);
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--white-soft);
+      text-align: center;
+      margin-bottom: 1rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .hearts-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .heart-glow {
+      position: absolute;
+      font-size: clamp(1.25rem, 4vw, 2rem);
+      opacity: 0;
+      animation: glowFloat 6s ease-in-out infinite;
+    }
+
+    .heart-glow:nth-child(1) { left: 5%; top: 10%; animation-delay: 0s; }
+    .heart-glow:nth-child(2) { left: 88%; top: 12%; animation-delay: 1s; }
+    .heart-glow:nth-child(3) { left: 20%; top: 75%; animation-delay: 2s; }
+    .heart-glow:nth-child(4) { left: 75%; top: 70%; animation-delay: 0.5s; }
+    .heart-glow:nth-child(5) { left: 45%; top: 25%; animation-delay: 2.5s; }
+    .heart-glow:nth-child(6) { left: 10%; top: 50%; animation-delay: 1.5s; }
+    .heart-glow:nth-child(7) { left: 82%; top: 45%; animation-delay: 3s; }
+    .heart-glow:nth-child(8) { left: 35%; top: 85%; animation-delay: 0.8s; }
+    .heart-glow:nth-child(9) { left: 92%; top: 82%; animation-delay: 2.2s; }
+
+    @keyframes glowFloat {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0; }
+      20% { opacity: 0.6; }
+      50% { transform: translateY(-25px) scale(1.1); opacity: 0.8; }
+      80% { opacity: 0.5; }
+    }
+
+    /* ========== Love letter modal ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: linear-gradient(180deg, #2a0000 0%, #3d0000 100%);
+      border-radius: 4px;
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      max-width:  min(380px, 90vw);
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      animation: modalIn 0.5s ease-out;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--white-soft);
+      margin-bottom: 1rem;
+    }
+
+    .modal .letter {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.8vw, 1.1rem);
+      line-height: 1.9;
+      color: #e8b0b0;
+      white-space: pre-line;
+      text-align: left;
+    }
+
+    .modal .sign-off {
+      margin-top: 1.25rem;
+      font-style: italic;
+      text-align: right;
+    }
+
+    .modal-close {
+      display: block;
+      margin: 1.25rem auto 0;
+      padding: 0.5rem 1.25rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      background: var(--red-soft);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--red-deep);
+    }
+
+    /* Music hint: subtle, doesn’t compete with content */
+    .music-hint {
+      position: fixed;
+      bottom: clamp(0.75rem, 3vw, 1.25rem);
+      right: clamp(0.75rem, 3vw, 1.25rem);
+      font-family: var(--font-display);
+      font-size: clamp(0.7rem, 2vw, 0.8rem);
+      letter-spacing: 0.05em;
+      color: rgba(232, 160, 160, 0.7);
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background floating hearts -->
+  <div class="hearts-bg" aria-hidden="true">
+    <span class="heart-float">💕</span>
+    <span class="heart-float">💗</span>
+    <span class="heart-float">💖</span>
+    <span class="heart-float">💕</span>
+    <span class="heart-float">💗</span>
+    <span class="heart-float">💖</span>
+    <span class="heart-float">💕</span>
+    <span class="heart-float">💗</span>
+    <span class="heart-float">💖</span>
+  </div>
+
+  <!-- Main question screen: full viewport, no box -->
+  <main class="page" id="mainPage">
+    <div class="page-content">
+      <p class="question" id="questionText">Jesrael Tucli, will you be my boyfriend? 💖</p>
+      <p class="signature">— Rovic Mejia</p>
+      <div class="divider" aria-hidden="true"></div>
+      <p class="message" id="sweetMessage"></p>
+      <div class="cta-wrap">
+        <button type="button" class="btn btn-yes glow" id="btnYes">Yes 💕</button>
+        <button type="button" class="btn btn-no" id="btnNo" aria-label="No">No 😢</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Surprise screen (after Yes) -->
+  <div class="surprise-screen" id="surpriseScreen">
+    <div class="hearts-glow" aria-hidden="true">
+      <span class="heart-glow">💖</span>
+      <span class="heart-glow">💗</span>
+      <span class="heart-glow">💕</span>
+      <span class="heart-glow">💖</span>
+      <span class="heart-glow">💗</span>
+      <span class="heart-glow">💕</span>
+      <span class="heart-glow">💖</span>
+      <span class="heart-glow">💗</span>
+      <span class="heart-glow">💕</span>
+    </div>
+    <p class="unlocked" id="unlockedText">You just unlocked something special 💌</p>
+  </div>
+
+  <!-- Love letter modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h2>💌 A letter for you</h2>
+      <div class="letter">Jesrael,<br><br>From the moment I met you, my heart knew.<br>Thank you for saying yes.<br>I promise to choose you every day.<br><br>Love,<br>Rovic 💖</div>
+      <p class="sign-off"></p>
+      <button type="button" class="modal-close" id="modalClose">Close</button>
+    </div>
+  </div>
+
+  <!-- Background music (starts on first user interaction). Replace src with your own romantic MP3 URL if needed. -->
+  <audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/01/18/audio_81a2d2c83c.mp3" type="audio/mpeg" />
+  </audio>
+
+  <p class="music-hint" id="musicHint">Tap anywhere to play music 🎵</p>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ========== DOM refs ==========
+      var mainPage = document.getElementById('mainPage');
+      var questionText = document.getElementById('questionText');
+      var sweetMessage = document.getElementById('sweetMessage');
+      var btnYes = document.getElementById('btnYes');
+      var btnNo = document.getElementById('btnNo');
+      var surpriseScreen = document.getElementById('surpriseScreen');
+      var unlockedText = document.getElementById('unlockedText');
+      var modalOverlay = document.getElementById('modalOverlay');
+      var modalClose = document.getElementById('modalClose');
+      var bgMusic = document.getElementById('bgMusic');
+      var musicHint = document.getElementById('musicHint');
+
+      // ========== Sweet messages when "No" is clicked (no repeats) ==========
+      var noMessagesPool = [
+        'Are you sure? 🥺',
+        'Please think again 💗',
+        'My heart chose you already 💞',
+        'One more chance? 💕',
+        'You make everything better 💖',
+        'Say yes? Pretty please? 💗',
+        'I really mean it 💖',
+        'Give us a shot? 💕',
+        'You are the one I want 💗',
+        'My heart is set on you 💞',
+        'Reconsider? I’ll make you happy 💕',
+        'There’s no one else like you 💖',
+        'Just one yes? 🥺',
+        'I’m not giving up on you 💗',
+        'Think about the good times 💕',
+        'I believe in us 💞',
+        'Say yes and make my day 💖',
+        'You’re too special to let go 💗',
+        'One more try? 💕',
+        'I’ll wait for your yes 💞',
+        'You’re my favorite person 💖',
+        'Please? My heart is asking 💗',
+        'I chose you from the start 💕',
+        'Let’s do this together 💞',
+        'Your yes would mean everything 💖',
+        'I’m here for you 💗',
+        'Don’t leave me hanging 💕',
+        'You deserve all the love 💞',
+        'I’m serious about you 💖',
+        'There’s only one answer... 💕'
+      ];
+      var noMessages = noMessagesPool.slice();
+      var noClickCount = 0;
+
+      // ========== Start music on first user interaction ==========
+      function startMusicOnce() {
+        if (bgMusic.paused) {
+          bgMusic.volume = 0.3;
+          bgMusic.play().catch(function () {});
+          musicHint.style.display = 'none';
+        }
+      }
+
+      document.body.addEventListener('click', startMusicOnce, { once: true });
+      document.body.addEventListener('touchstart', startMusicOnce, { once: true });
+
+      // ========== No button: starts centered with Yes; on each click shrinks and moves (never over Yes) ==========
+      var NO_BTN_W = 100;
+      var NO_BTN_H = 44;
+      var YES_PADDING = 32;
+      var noScale = 1;
+
+      function getYesRect() {
+        var r = btnYes.getBoundingClientRect();
+        return {
+          left: r.left - YES_PADDING,
+          top: r.top - YES_PADDING,
+          right: r.right + YES_PADDING,
+          bottom: r.bottom + YES_PADDING
+        };
+      }
+
+      function noOverlapsYes(noLeft, noTop, noW, noH) {
+        var yes = getYesRect();
+        var noRight = noLeft + noW;
+        var noBottom = noTop + noH;
+        return (noRight < yes.left || noLeft > yes.right || noBottom < yes.top || noTop > yes.bottom);
+      }
+
+      function moveNoButton() {
+        if (!btnNo.classList.contains('floating')) return;
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var w = NO_BTN_W * noScale;
+        var h = NO_BTN_H * noScale;
+        var margin = 12;
+        var maxLeft = Math.max(margin, vw - w - margin);
+        var maxTop = Math.max(margin, vh - h - margin);
+        var left, top;
+        var tries = 0;
+        do {
+          left = margin + Math.random() * (maxLeft - margin);
+          top = margin + Math.random() * (maxTop - margin);
+          tries++;
+        } while (!noOverlapsYes(left, top, w, h) && tries < 40);
+        btnNo.style.left = left + 'px';
+        btnNo.style.top = top + 'px';
+      }
+
+      // ========== Make "Yes" button slightly bigger each "No" click ==========
+      function growYesButton() {
+        var scale = 1 + Math.min(noClickCount * 0.08, 0.5);
+        btnYes.style.transform = 'scale(' + scale + ')';
+      }
+
+      // ========== No button click: show sub question, shrink No, move to new area (no repeat messages) ==========
+      var fallbackMessage = "There's only one answer... 💖";
+      function getNextMessage() {
+        if (noMessages.length === 0) return fallbackMessage;
+        var i = Math.floor(Math.random() * noMessages.length);
+        var msg = noMessages[i];
+        noMessages.splice(i, 1);
+        return msg;
+      }
+
+      btnNo.addEventListener('click', function () {
+        var msg = getNextMessage();
+        sweetMessage.textContent = msg;
+        noClickCount++;
+        if (noClickCount === 1) {
+          btnNo.classList.add('floating');
+        }
+        noScale = Math.max(0.5, 1 - noClickCount * 0.07);
+        btnNo.style.transform = 'scale(' + noScale + ')';
+        moveNoButton();
+        growYesButton();
+      });
+
+      window.addEventListener('resize', function () {
+        if (mainPage.classList.contains('hidden') || !btnNo.classList.contains('floating')) return;
+        var left = parseFloat(btnNo.style.left) || 0;
+        var top = parseFloat(btnNo.style.top) || 0;
+        var w = NO_BTN_W * noScale;
+        var h = NO_BTN_H * noScale;
+        if (!noOverlapsYes(left, top, w, h)) moveNoButton();
+      });
+
+      // ========== Confetti burst ==========
+      function fireConfetti() {
+        if (typeof confetti !== 'function') return;
+        var count = 120;
+        var defaults = { origin: { y: 0.7 }, colors: ['#c94a4a', '#a01818', '#e8a0a0', '#8B0000', '#fff5f5'] };
+        confetti({ ...defaults, particleCount: count });
+        confetti({ ...defaults, spread: 100, scalar: 1.2 });
+        setTimeout(function () {
+          confetti({ ...defaults, particleCount: count * 0.5, angle: 60, spread: 55 });
+          confetti({ ...defaults, particleCount: count * 0.5, angle: 120, spread: 55 });
+        }, 200);
+      }
+
+      // ========== Yes button click ==========
+      btnYes.addEventListener('click', function () {
+        btnYes.classList.remove('glow');
+        fireConfetti();
+        mainPage.classList.add('hidden');
+        surpriseScreen.classList.add('visible');
+
+        setTimeout(function () {
+          modalOverlay.classList.add('visible');
+        }, 2000);
+      });
+
+      // ========== Close modal ==========
+      modalClose.addEventListener('click', function () {
+        modalOverlay.classList.remove('visible');
+      });
+
+      modalOverlay.addEventListener('click', function (e) {
+        if (e.target === modalOverlay) modalOverlay.classList.remove('visible');
+      });
+
+    })();
+  </script>
+</body>
+</html>
