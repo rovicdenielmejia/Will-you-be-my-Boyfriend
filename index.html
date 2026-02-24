@@ -422,9 +422,9 @@
     <span class="heart-float">💖</span>
   </div>
 
-  <!-- Main question screen: full viewport, no box -->
+  <!-- Single main screen: question first, then success state on same screen -->
   <main class="page" id="mainPage">
-    <div class="page-content">
+    <div class="page-content" id="pageContent">
       <p class="question" id="questionText">Jesrael Tucli, will you be my boyfriend? 💖</p>
       <p class="signature">— Rovic Mejia</p>
       <div class="divider" aria-hidden="true"></div>
@@ -434,23 +434,21 @@
         <button type="button" class="btn btn-no" id="btnNo" aria-label="No">No 😢</button>
       </div>
     </div>
-  </main>
-
-  <!-- Surprise screen (after Yes) -->
-  <div class="surprise-screen" id="surpriseScreen">
-    <div class="hearts-glow" aria-hidden="true">
-      <span class="heart-glow">💖</span>
-      <span class="heart-glow">💗</span>
-      <span class="heart-glow">💕</span>
-      <span class="heart-glow">💖</span>
-      <span class="heart-glow">💗</span>
-      <span class="heart-glow">💕</span>
-      <span class="heart-glow">💖</span>
-      <span class="heart-glow">💗</span>
-      <span class="heart-glow">💕</span>
+    <div class="page-success" id="pageSuccess">
+      <div class="hearts-glow" aria-hidden="true">
+        <span class="heart-glow">💖</span>
+        <span class="heart-glow">💗</span>
+        <span class="heart-glow">💕</span>
+        <span class="heart-glow">💖</span>
+        <span class="heart-glow">💗</span>
+        <span class="heart-glow">💕</span>
+        <span class="heart-glow">💖</span>
+        <span class="heart-glow">💗</span>
+        <span class="heart-glow">💕</span>
+      </div>
+      <p class="unlocked" id="unlockedText">You just unlocked something special 💌</p>
     </div>
-    <p class="unlocked" id="unlockedText">You just unlocked something special 💌</p>
-  </div>
+  </main>
 
   <!-- Love letter modal -->
   <div class="modal-overlay" id="modalOverlay">
@@ -475,12 +473,12 @@
 
       // ========== DOM refs ==========
       var mainPage = document.getElementById('mainPage');
+      var pageContent = document.getElementById('pageContent');
+      var pageSuccess = document.getElementById('pageSuccess');
       var questionText = document.getElementById('questionText');
       var sweetMessage = document.getElementById('sweetMessage');
       var btnYes = document.getElementById('btnYes');
       var btnNo = document.getElementById('btnNo');
-      var surpriseScreen = document.getElementById('surpriseScreen');
-      var unlockedText = document.getElementById('unlockedText');
       var modalOverlay = document.getElementById('modalOverlay');
       var modalClose = document.getElementById('modalClose');
       var bgMusic = document.getElementById('bgMusic');
