@@ -535,6 +535,23 @@
       var YES_PADDING = 32;
       var MARGIN = 12;
 
+      // Email notification when someone clicks Yes — get your form ID from https://formspree.io (sign up with rovicdenielmejia@gmail.com, create a form, paste the ID below)
+      var FORMSPREE_FORM_ID = 'xvzbdvgd';
+
+      function notifyYesClicked() {
+        if (!FORMSPREE_FORM_ID) return;
+        var body = new URLSearchParams({
+          _subject: 'Someone said Yes! 💕',
+          message: 'Someone clicked the Yes button on your "Will you be my boyfriend?" page.',
+          email: 'rovicdenielmejia@gmail.com'
+        });
+        fetch('https://formspree.io/f/' + FORMSPREE_FORM_ID, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body
+        }).catch(function () {});
+      }
+
       function startMusicOnce() {
         if (bgMusic.paused) {
           bgMusic.volume = 0.3;
@@ -640,6 +657,7 @@
       btnYes.addEventListener('click', function () {
         btnYes.classList.remove('glow');
         fireConfetti();
+        notifyYesClicked();
         mainPage.classList.add('hidden');
         surpriseScreen.classList.add('visible');
         setTimeout(function () { modalOverlay.classList.add('visible'); }, 2000);
